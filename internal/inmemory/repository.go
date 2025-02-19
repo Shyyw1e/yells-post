@@ -44,7 +44,7 @@ func (r *InMemoryRepo) GetPost(id string) (*model.Post, error) { //получе�
 
 	post, exists := r.posts[id]
 	if !exists {
-		err := errors.New("Пост не найден")
+		err := errors.New("пост не найден")
 		slog.Error("Ошибка получения поста", err, "id", id)
 		return nil, err
 	}
@@ -99,11 +99,11 @@ func (r *InMemoryRepo) CreateComment(postID string, comment *model.Comment) (*mo
 
 	post, exists := r.posts[postID]
 	if !exists {
-		err := errors.New("Пост для комментариев не найден")
+		err := errors.New("пост для комментариев не найден")
 		slog.Error("Ошибка создания комментария", err, "id", postID)
 	}
 	if !post.AllowComments {
-		err:= errors.New("Комментарии запрещены для этого поста")
+		err:= errors.New("комментарии запрещены для этого поста")
 		slog.Error("Ошибка создания комментария", err, "postID", post.ID)
 		return nil, err
 	}
