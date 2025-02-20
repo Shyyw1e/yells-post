@@ -6,33 +6,26 @@ import (
 )
 
 func (r *queryResolver) Posts(ctx context.Context, page *int32, pageSize *int32) ([]*model.Post, error) {
-    // Пример с тестовыми данными. Можно добавить обработку пагинации.
-    posts := []*model.Post{
-        {
-            ID:            "1",
-            Title:         "Первый пост",
-            Content:       "Содержимое первого поста",
-            AllowComments: true,
-            Comments:      []*model.Comment{}, // пока пустой список
-        },
-        {
-            ID:            "2",
-            Title:         "Второй пост",
-            Content:       "Содержимое второго поста",
-            AllowComments: false,
-            Comments:      []*model.Comment{},
-        },
+    var p, ps int
+    if page != nil {
+        p = int(*page)
+    } else {
+        p = 1
     }
-    return posts, nil
+    if pageSize != nil {
+        ps = int(*pageSize)
+    } else {
+        ps = 10
+    }
+    return r.PostUsecase.ListPosts(p, ps)
 }
 
 func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error) {
-    // Пример с тестовыми данными.
-    return &model.Post{
-        ID:            id,
-        Title:         "Тестовый пост",
-        Content:       "Содержимое тестового поста",
-        AllowComments: true,
-        Comments:      []*model.Comment{},
-    }, nil
+    return r.PostUsecase.GetPost(id)
 }
+
+func (r *Resolver) Query() QueryResolver {
+    return &queryResolver{r}
+}
+
+type queryResolver struct { *Resolver}

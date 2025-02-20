@@ -28,3 +28,9 @@ func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID string) 
 
     return commentChan, nil
 }
+
+func (r *Resolver) Subscription() SubscriptionResolver {
+    return &subscriptionResolver{r}
+}
+
+type subscriptionResolver struct { *Resolver}
