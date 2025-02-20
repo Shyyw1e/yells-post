@@ -2,8 +2,6 @@ package postgres
 
 import (
 	"errors"
-	"fmt"
-	"time"
 
 	"log/slog"
 
