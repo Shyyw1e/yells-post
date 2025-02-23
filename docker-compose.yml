@@ -1,0 +1,29 @@
+
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    container_name: yells-post-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Shyywie_8169
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    restart: always
+    container_name: yells-post-app
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgres://postgres:Shyywie_8169@db:5432/postgres?sslmode=disable"
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:
