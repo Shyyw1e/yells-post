@@ -2,13 +2,15 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
 	"yells-post/graph"
-	"yells-post/internal/inmemory"
+	//"yells-post/internal/inmemory"
 	"yells-post/internal/usecase"
+	"yells-post/internal/postgres"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -26,10 +28,16 @@ func main() {
 		port = defaultPort
 	}
 
-	repo := inmemory.NewInMemoryRepo()
+	db, err := postgres.NewDB("localhost", "5432", "postgres", "Shyywie_8169", "postgres")
+	if err != nil {
+		slog.Error("Ошибка подключения к DB: ", err)
+		return
+	}
 
-	postUsecase := usecase.NewPostUsecase(repo)
-	commentUsecase := usecase.NewCommentUsecase(repo)
+	pgRepo := postgres.NewRepo(db)
+	
+	postUsecase := usecase.NewPostUsecase(pgRepo)
+	commentUsecase := usecase.NewCommentUsecase(pgRepo)
 
 	resolver := &graph.Resolver{
 		PostUsecase: postUsecase,
@@ -51,7 +59,11 @@ func main() {
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
-
+	
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
+
+
+// netstat -ano | findstr :8080  список процессов
+// taskkill /PID <номер_PID> /F закрытие процесса (для того чтобы localhost освобождать, можно просто менять порт локалхоста)

@@ -18,7 +18,7 @@ type Post struct {
 	Title         string     `json:"title"`
 	Content       string     `json:"content"`
 	Comments      []*Comment `json:"comments"`
-	AllowComments bool       `json:"allowComments"`
+	AllowComments bool       `json:"allowComments" db:"allow_comments"`
 }
 
 type Query struct {
