@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log/slog"
 
-	"yells-post/internal/domain"
 	"yells-post/graph/model"
+	"yells-post/internal/domain"
 )
 
 type CommentUsecase struct {
@@ -32,8 +32,8 @@ func (u *CommentUsecase) CreateComment(postID, text string, parentID *string) (*
 	}
 
 	comment := &model.Comment{
-		Text: text,
-		Author: "anonymous",
+		Text:     text,
+		Author:   "anonymous",
 		ParentID: parentID,
 	}
 

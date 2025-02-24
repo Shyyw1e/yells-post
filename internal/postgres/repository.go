@@ -2,12 +2,14 @@ package postgres
 
 import (
 	"errors"
+	"strconv"
 
 	"log/slog"
 
-	"github.com/jmoiron/sqlx"
-	"yells-post/internal/domain"
 	"yells-post/graph/model"
+	"yells-post/internal/domain"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type Repo struct {
@@ -73,7 +75,7 @@ func (r *Repo) ListPosts(page, pageSize int) ([]*model.Post, error) {
 func (r *Repo) UpdatePost(post *model.Post) error {
 	query := `
 		UPDATE posts
-		SET title = $1, content = $2, allow_comment = $3
+		SET title = $1, content = $2, allow_comments = $3
 		WHERE id = $4;
 	`
 
@@ -104,11 +106,21 @@ func (r *Repo) CreateComment(postID string, comment *model.Comment) (*model.Comm
 	`
 
 	var id string
-	err := r.DB.QueryRow(query, postID, comment.Text, comment.Author, comment.ParentID).Scan(&id)
+	slog.Info("SQL-запрос на вставку комментария", "query", query, "postID", postID, "text", comment.Text)
+	postIDInt, err := strconv.Atoi(postID)
+	if err != nil {
+		slog.Error("Ошибка конвертации postID в int", "postID", postID, "error", err)
+		return nil, err
+	}
+	err = r.DB.QueryRow(query, postIDInt, comment.Text, comment.Author, comment.ParentID).Scan(&id)
 	if err != nil {
 		slog.Error("Ошибка создания комментария", err, "postID", postID)
 		return nil, err
 	}
+
+	slog.Info("Комментарий сохранен в БД", "id", id, "postID", postID)
+
+	comment.ID = id
 	return comment, nil
 }
 
@@ -123,7 +135,13 @@ func (r *Repo) ListCommentsbyPost(postID string, page, pageSize int) ([]*model.C
 	`
 
 	var comments []*model.Comment
-	err := r.DB.Select(&comments, query, postID, pageSize, offset)
+	postIDInt, err := strconv.Atoi(postID)
+	if err != nil {
+    	slog.Error("Ошибка переопределения типа", err, "postID", postID)
+		return nil, err
+	}
+	err = r.DB.Select(&comments, query, postIDInt, pageSize, offset)
+
 	if err != nil {
 		slog.Error("Ошибка получения комментариев к посту", err, "postID", postID)
 		return nil, err
